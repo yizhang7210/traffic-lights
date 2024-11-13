@@ -28,7 +28,7 @@
         let y2 = initialy2;
 				let dx = 0; // Speed in x direction
         let dy1 = 2; // Speed in y direction
-        let dy2 = 5; // Speed in y direction
+        let dy2 = 6; // Speed in y direction
 
         function drawBox() {
             ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
@@ -41,16 +41,20 @@
             y2 += dy2; // Update x position
 
             // Reverse direction if hitting the edges
-            if (y1 + 50 > canvas.height || y1 < 0) {
-                y1 = initialy1;
+            if (y1 + 50 >=canvas.height || y1 < 0) {
+                y1 = 0;                
             }
-            if (y2 + 50 > canvas.height || y2 < 0) {
-                y2 = initialy1;
+            if (y2 + 50 >= canvas.height || y2 < 0) {
+            		if (y1 <= 80) {
+                		dy2 = 0;
+                } else {
+                		y2 = 0;                
+                }
             }
             
-            if ((y1 - y2) < 40) {
-            		dy1 = 0;
-            } else (y1 - y2) < 80) {
+            if (y1 <= 50 && y2 + 50 >= canvas.height) {
+            		dy2 = 0;
+            } else if (y1 > y2 && (y1 - y2) < 80) {
             		dy2 = dy1;
             } else {
             		dy2 = initialdy2;
