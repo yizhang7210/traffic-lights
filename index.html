@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Moving Box</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myCanvas" width="500" height="300"></canvas>
+
+    <script>
+        const canvas = document.getElementById("myCanvas");
+        const ctx = canvas.getContext("2d");
+
+        let x = 0;
+        let y = 100;
+        let dx = 2; // Speed in x direction
+        let dy = 0; // Speed in y direction
+
+        function drawBox() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+            ctx.fillRect(x, y, 50, 50); // Draw box
+
+            x += dx; // Update x position
+
+            // Reverse direction if hitting the edges
+            if (x + 50 > canvas.width || x < 0) {
+                dx = -dx;
+            }
+
+            requestAnimationFrame(drawBox); // Call the function again for animation
+        }
+
+        drawBox(); // Start the animation
+    </script>
+</body>
+</html>
