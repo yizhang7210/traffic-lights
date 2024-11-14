@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Moving Box</title>
+    <title>Traffic Light Simulation</title>
     <style>
         canvas {
             border: 1px solid black;
@@ -9,61 +9,9 @@
     </style>
 </head>
 <body>
-    <canvas id="myCanvas" width="500" height="300"></canvas>
+    <canvas id="myCanvas" width="800" height="1200"></canvas>
+    <button id="pause">Pause</button>
 
-    <script>
-        const canvas = document.getElementById("myCanvas");
-        const ctx = canvas.getContext("2d");
-
-				const initialx1 = 100;
-				const initialy1 = 0;
-        const initialx2 = 100;
-				const initialy2 = 100;
-        const initialdy1 = 2;
-        const initialdy2 = 5;
-
-        let x1 = initialx1;
-        let y1 = initialy1;
-        let x2 = initialx2;
-        let y2 = initialy2;
-				let dx = 0; // Speed in x direction
-        let dy1 = 2; // Speed in y direction
-        let dy2 = 6; // Speed in y direction
-
-        function drawBox() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
-            ctx.fillStyle = "green";
-            ctx.fillRect(x1, y1, 50, 50); // Draw box
-            ctx.fillStyle = "red";
-            ctx.fillRect(x2, y2, 50, 50); // Draw box
-
-            y1 += dy1; // Update x position
-            y2 += dy2; // Update x position
-
-            // Reverse direction if hitting the edges
-            if (y1 + 50 >=canvas.height || y1 < 0) {
-                y1 = 0;                
-            }
-            if (y2 + 50 >= canvas.height || y2 < 0) {
-            		if (y1 <= 80) {
-                		dy2 = 0;
-                } else {
-                		y2 = 0;                
-                }
-            }
-            
-            if (y1 <= 50 && y2 + 50 >= canvas.height) {
-            		dy2 = 0;
-            } else if (y1 > y2 && (y1 - y2) < 80) {
-            		dy2 = dy1;
-            } else {
-            		dy2 = initialdy2;
-            }
-
-            requestAnimationFrame(drawBox); // Call the function again for animation
-        }
-
-        drawBox(); // Start the animation
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
