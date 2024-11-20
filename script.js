@@ -6,12 +6,11 @@ let running = true;
 // TODO: Deal with the button after race is over
 // TODO: Make number of lanes configurable
 const LINE = 100;
-const BRAKING_ACCELERATION = -3;
-const FORWARD_ACCELERATION = 2;
+const BRAKING_ACCELERATION = -0.5;
 
 // TODO: Make these parameateres configurable
-const MIN_SAFE_DISTANCE = 30;
-const MAX_SAFE_DISTANCE = 50;
+const MIN_SAFE_DISTANCE = 15;
+const MAX_SAFE_DISTANCE = 20;
 
 // Configure the start/stop button
 const pause = document.getElementById('pause')
@@ -25,18 +24,26 @@ pause.addEventListener('click', function () {
 })
 
 class Car {
-  constructor(x, y, length, current_speed, top_speed, acceleration, color) {
+  constructor(x, y, length, current_speed, top_speed, top_acceleration, color) {
     this.x = x
     this.y = y
     this.length = length
-    this.width = 50
+    this.width = 20
 
-    this.current_speed = current_speed
-    this.top_speed = top_speed
-    this.acceleration = acceleration
+    this.current_speed = 0;
+    this.current_acceleration = 0;
+    this.top_speed = top_speed;
+    this.top_acceleration = top_acceleration;
     this.color = color
   }
+}
 
+function smallCarAt(x, y) {
+  return new Car(x, y, 22, 0, 2.5, 6, 'green');
+}
+
+function bigCarAt(x, y) {
+  return new Car(x, y, 280, 0, 1.8, 3, 'red');
 }
 
 class CarLane {
@@ -52,7 +59,8 @@ class CarLane {
     this.cars.sort((c1, c2) => {return c1.y - c2.y});
 
     // Stop when the first car crosses the line
-    if (this.cars[0].y <= LINE) {
+    const lastIndex = this.cars.length - 1;
+    if (this.cars[lastIndex].y <= LINE) {
       running = false;
       return;
     }
@@ -65,7 +73,7 @@ class CarLane {
       curr.y -= curr.current_speed;
 
       // update speed based on acceleration
-      curr.current_speed = Math.max(0, Math.min(curr.top_speed, curr.current_speed + curr.acceleration))
+      curr.current_speed = Math.max(0, Math.min(curr.top_speed, curr.current_speed + curr.current_acceleration))
 
       if (i === 0) {
         this.cars[0].current_speed = this.cars[0].top_speed;
@@ -74,14 +82,20 @@ class CarLane {
 
       const prev = this.cars[i-1];
 
-      if (curr.y <= prev.y + prev.length + MIN_SAFE_DISTANCE) {
-        // slow down to match car in front if too close
-        curr.acceleration = BRAKING_ACCELERATION;
+      if (curr.y <= prev.y + prev.length) {
+        // you hit the car in front
+        prev.current_speed = 0
+        prev.current_acceleration = 0
+        curr.current_speed = 0
+        curr.current_acceleration = 0
+      } else if (curr.y <= prev.y + prev.length + MIN_SAFE_DISTANCE) {
+        // slow down if too close to the car in front
+        curr.current_acceleration = BRAKING_ACCELERATION;
       } else if (curr.y > prev.y + prev.length + MAX_SAFE_DISTANCE) {
         // accelerate if car in front is far away
-        curr.acceleration = FORWARD_ACCELERATION;
+        curr.current_acceleration = curr.top_acceleration;
       } else {
-        curr.acceleration = 0;
+        curr.current_acceleration = 0;
       }
 
     }
@@ -96,14 +110,24 @@ class CarLane {
 }
 
 const line1 = new CarLane([
-  new Car(100, 400, 50, 1, 2, 0, 'green'),
-  new Car(100, 700, 80, 6, 5, 0, 'red')
+  bigCarAt(100, 400),
+  smallCarAt(100, 700),
 ]);
 
 const line2 = new CarLane([
-  new Car(500, 250, 50, 2, 2, 0, 'green'),
-  new Car(500, 500, 80, 3, 10, 0, 'red'),
-  new Car(500, 700, 100, 5, 15, 0, 'blue')
+  smallCarAt(500, 400),
+  smallCarAt(500, 425),
+  smallCarAt(500, 450),
+  smallCarAt(500, 475),
+  smallCarAt(500, 500),
+  smallCarAt(500, 525),
+  smallCarAt(500, 550),
+  smallCarAt(500, 575),
+  smallCarAt(500, 600),
+  smallCarAt(500, 625),
+  smallCarAt(500, 650),
+  smallCarAt(500, 675),
+  smallCarAt(500, 700),
 ]);
 
 function drawLine () {
