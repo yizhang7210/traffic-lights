@@ -1,7 +1,9 @@
+/*
+Constants
+*/
 const canvas = document.getElementById('myCanvas')
 const ctx = canvas.getContext('2d')
 
-let running = true;
 
 // TODO: Deal with the button after race is over
 // TODO: Make number of lanes configurable
@@ -9,19 +11,16 @@ const LINE = 100;
 const BRAKING_ACCELERATION = -0.5;
 
 // TODO: Make these parameateres configurable
+const MIN_STANDING_DISTANCE = 10;
 const MIN_SAFE_DISTANCE = 15;
 const MAX_SAFE_DISTANCE = 20;
 
 // Configure the start/stop button
-const pause = document.getElementById('pause')
-pause.addEventListener('click', function () {
-  running = !running;
-  if (running) {
-    pause.innerHTML = 'Pause';
-  } else {
-    pause.innerHTML = 'Resume';
-  }
-})
+const controlButton = document.getElementById('controlButton')
+
+/*
+Definitions
+*/
 
 class Car {
   constructor(x, y, length, current_speed, top_speed, top_acceleration, color) {
@@ -38,17 +37,19 @@ class Car {
   }
 }
 
-function smallCarAt(x, y) {
-  return new Car(x, y, 22, 0, 2.5, 6, 'green');
-}
-
-function bigCarAt(x, y) {
-  return new Car(x, y, 280, 0, 1.8, 3, 'red');
-}
-
 class CarLane {
-  constructor(cars_in_lane) {
+  constructor(x, cars_in_lane) {
+    this.x = x;
     this.cars = cars_in_lane;
+  }
+
+  addCar(car) {
+    this.cars.push(car);
+    console.log(this.cars)
+  }
+
+  size() {
+    return this.cars.length;
   }
 
   move() {
@@ -109,26 +110,55 @@ class CarLane {
   }
 }
 
-const line1 = new CarLane([
-  bigCarAt(100, 400),
-  smallCarAt(100, 700),
-]);
+/*
 
-const line2 = new CarLane([
-  smallCarAt(500, 400),
-  smallCarAt(500, 425),
-  smallCarAt(500, 450),
-  smallCarAt(500, 475),
-  smallCarAt(500, 500),
-  smallCarAt(500, 525),
-  smallCarAt(500, 550),
-  smallCarAt(500, 575),
-  smallCarAt(500, 600),
-  smallCarAt(500, 625),
-  smallCarAt(500, 650),
-  smallCarAt(500, 675),
-  smallCarAt(500, 700),
-]);
+Interactions
+
+*/
+
+const LANES = [new CarLane(100, []), new CarLane(500, [])];
+
+function smallCarAt(x, y) {
+  return new Car(x, y, 22, 0, 1.2, 6, 'green');
+}
+
+function bigCarAt(x, y) {
+  return new Car(x, y, 280, 0, 1, 3, 'red');
+}
+
+function addSmallCar() {
+  const laneIndex = document.getElementById("laneNumber").value - 1;
+  const laneToAdd = LANES[laneIndex];
+  if (laneToAdd.size() === 0) {
+    laneToAdd.addCar(smallCarAt(laneToAdd.x, LINE));
+  } else {
+    const lastCar = laneToAdd.cars[laneToAdd.size() - 1];
+    laneToAdd.addCar(smallCarAt(laneToAdd.x, lastCar.y + lastCar.length + MIN_STANDING_DISTANCE));
+  }
+}
+
+function addBigCar() {
+  const laneIndex = document.getElementById("laneNumber").value - 1;
+  const laneToAdd = LANES[laneIndex];
+  if (laneToAdd.size() === 0) {
+    laneToAdd.addCar(bigCarAt(laneToAdd.x, LINE));
+  } else {
+    const lastCar = laneToAdd.cars[laneToAdd.size() - 1];
+    laneToAdd.addCar(bigCarAt(laneToAdd.x, lastCar.y + lastCar.length + MIN_STANDING_DISTANCE));
+  }
+}
+
+function start() {
+  running = !running;
+  if (running) {
+    controlButton.innerHTML = 'Pause';
+  } else {
+    controlButton.innerHTML = 'Resume';
+  }
+}
+
+
+let running = false;
 
 function drawLine () {
   ctx.fillStyle = 'black'
@@ -140,11 +170,11 @@ function drawLine () {
 
 function drawBox () {
   ctx.clearRect(0, 0, canvas.width, canvas.height) // Clear canvas
-  drawLine()
-  line1.move();
-  line1.redraw();
-  line2.move();
-  line2.redraw();
+  drawLine();
+  for (let lane of LANES) {
+    lane.move();
+    lane.redraw();
+  }
 
   requestAnimationFrame(drawBox) // Call the function again for animation
 }
