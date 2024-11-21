@@ -9,8 +9,16 @@
     </style>
 </head>
 <body>
+    <label for="laneNumber">Enter Lane Number (1 for left, 2 for right) </label> <input type="text" id="laneNumber">
+
+    <button id="addSmallCar" onclick="addSmallCar()">Add Small Car</button>
+    <button id="addBigCar" onclick="addBigCar()">Add Big Car</button>
+
+    <div>
+        <button id="controlButton" onclick="start()">Start</button>
+    </div>
+
     <canvas id="myCanvas" width="800" height="1200"></canvas>
-    <button id="pause">Pause</button>
 
     <script src="script.js"></script>
 </body>
