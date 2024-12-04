@@ -9,16 +9,27 @@
     </style>
 </head>
 <body>
-    <label for="laneNumber">Enter Lane Number (1 for left, 2 for right) </label> <input type="text" id="laneNumber">
-
-    <button id="addSmallCar" onclick="addSmallCar()">Add Small Car</button>
-    <button id="addBigCar" onclick="addBigCar()">Add Big Car</button>
-
-    <div>
-        <button id="controlButton" onclick="start()">Start</button>
+    <p>There are 2 lanes of cars at the traffic lights, you want to know which lane would get you to the light faster.</p>
+    <div style="display: flex; justify-content: space-between; width: 50vw; margin-bottom: 10px;">
+        <div style="text-align: left">
+            <div>
+                <label>Lane 1:</label>
+                <button id="addSmallCarLane1" onclick="addSmallCar(0)">Add Small Car</button>
+                <button id="addBigCarLane1" onclick="addBigCar(0)">Add Big Car</button>
+            </div>
+            <div>
+                <label>Lane 2:</label>
+                <button id="addSmallCarLane2" onclick="addSmallCar(1)">Add Small Car</button>
+                <button id="addBigCarLane2" onclick="addBigCar(1)">Add Big Car</button>
+            </div>
+        </div>
+        <div style="text-align: right">
+            <button id="controlButton" onclick="start_pause()">Start</button>
+            <button id="resetButton" onclick="reset()">Reset</button>
+        </div>
     </div>
 
-    <canvas id="myCanvas" width="800" height="1200"></canvas>
+    <canvas id="myCanvas"></canvas>
 
     <script src="script.js"></script>
 </body>
