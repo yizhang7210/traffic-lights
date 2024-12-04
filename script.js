@@ -128,7 +128,7 @@ class CarLane {
       } else if (curr.x >= prev.x - MIN_SAFE_DISTANCE - curr.length) {
         // slow down if too close to the car in front
         curr.current_acceleration = BRAKING_ACCELERATION
-      } else if (curr.y < prev.x - MAX_SAFE_DISTANCE - curr.length) {
+      } else if (curr.x < prev.x - MAX_SAFE_DISTANCE - curr.length) {
         // accelerate if car in front is far away
         curr.current_acceleration = curr.top_acceleration
       } else {
