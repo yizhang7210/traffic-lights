@@ -17,7 +17,6 @@ canvas.style.height = sizeHeight
 
 let state = 'NOT_STARTED'
 
-// TODO: Deal with the button after race is over
 // TODO: Make number of lanes configurable
 const LINE_MARGIN = 100
 const LINE = canvas.width - LINE_MARGIN
@@ -25,11 +24,15 @@ const BRAKING_ACCELERATION = -0.5
 
 // TODO: Make these parameateres configurable
 const MIN_STANDING_DISTANCE = 10
-const MIN_SAFE_DISTANCE = 15
+const MIN_SAFE_DISTANCE = 12
 const MAX_SAFE_DISTANCE = 20
 const CAR_WIDTH = 20
-const SMALL_CAR_LENGTH = 22
-const BIG_CAR_LENGTH = 280
+const SMALL_CAR_LENGTH = 20
+const BIG_CAR_LENGTH = 240
+const SMALL_CAR_TOP_SPEED = 2.5
+const BIG_CAR_TOP_SPEED = 1
+const SMALL_CAR_TOP_ACCELERATION = 0.05
+const BIG_CAR_TOP_ACCELERATION = 0.01
 
 // Configure the start/stop button
 const controlButton = document.getElementById('controlButton')
@@ -158,11 +161,11 @@ let LANES = START_LANES.map(lane => lane.clone())
 let SAVED_LANES = []
 
 function smallCarAt (x, y) {
-  return new Car(x, y, SMALL_CAR_LENGTH, 0, 1.2, 6, 'green')
+  return new Car(x, y, SMALL_CAR_LENGTH, 0, SMALL_CAR_TOP_SPEED, SMALL_CAR_TOP_ACCELERATION, 'green')
 }
 
 function bigCarAt (x, y) {
-  return new Car(x, y, BIG_CAR_LENGTH, 0, 1, 3, 'red')
+  return new Car(x, y, BIG_CAR_LENGTH, 0, BIG_CAR_TOP_SPEED, BIG_CAR_TOP_ACCELERATION, 'red')
 }
 
 function addSmallCar (laneIndex) {
