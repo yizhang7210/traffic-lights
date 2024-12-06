@@ -20,6 +20,7 @@ const INFINITY = 1000000
 
 // TODO: Make number of lanes configurable
 const LINE_MARGIN = 100
+const TEXT_MARGIN = 5
 const LINE = canvas.width - LINE_MARGIN
 const BRAKING_ACCELERATION = -0.5
 
@@ -44,7 +45,7 @@ Definitions
 */
 
 class Car {
-  constructor (x, y, length, current_speed, top_speed, top_acceleration, color) {
+  constructor (name, x, y, length, current_speed, top_speed, top_acceleration, color) {
     this.x = x
     this.y = y
     this.length = length
@@ -55,10 +56,11 @@ class Car {
     this.top_speed = top_speed
     this.top_acceleration = top_acceleration
     this.color = color
+    this.name = name
   }
 
   clone () {
-    return new Car(this.x, this.y, this.length, this.current_speed, this.top_speed, this.top_acceleration, this.color)
+    return new Car(this.name, this.x, this.y, this.length, this.current_speed, this.top_speed, this.top_acceleration, this.color)
   }
 }
 
@@ -70,13 +72,11 @@ class LaneChangeSituation {
     this.distanceInFront = distanceInFront
   }
 
-  score () {
-    return this.distanceInFront / this.carSpeedInFront
-  }
 }
 
 class CarLane {
-  constructor (y, cars_in_lane) {
+  constructor (name, y, cars_in_lane) {
+    this.name = name
     this.y = y
     this.cars = cars_in_lane
     this.cars.sort((c1, c2) => {
@@ -95,7 +95,7 @@ class CarLane {
   }
 
   clone () {
-    return new CarLane(this.y, this.cars.map(car => car.clone()))
+    return new CarLane(this.name, this.y, this.cars.map(car => car.clone()))
   }
 
   removeCarAt (index) {
@@ -148,7 +148,7 @@ class CarLane {
 
       const canChangeLanes = document.getElementById('canChangeLanes').checked
       // Explore changing lanes
-      if (canChangeLanes) {
+      if (canChangeLanes && curr.x < LINE) {
         for (const adjacent_lane of adjacent_lanes) {
 
           // if no car in the next lane, definitely change lanes
@@ -161,7 +161,8 @@ class CarLane {
           // Go through all the cars in the adjacent lane and try to find a spot
           while (j < adjacent_lane.size()) {
             // Try to find the first car behind with enough of a gap
-            if (adjacent_lane.cars[j].x + adjacent_lane.cars[j] + MAX_SAFE_DISTANCE >= curr.x) {
+            if (adjacent_lane.cars[j].x + adjacent_lane.cars[j].length + MAX_SAFE_DISTANCE >= curr.x) {
+              j += 1
               continue
             }
 
@@ -190,17 +191,21 @@ class CarLane {
         }
 
         possibleLaneChanges.sort((a, b) => {
-          return b.score() - a.score()
-        })
+          if (a.carSpeedInFront === 0 || b.carSpeedInFront === 0) {
+            return b.distanceInFront - a.distanceInFront
+          }
 
-        if (possibleLaneChanges[0].laneTo !== this) {
-          // Actually Change lanes
-          possibleLaneChanges[0].laneTo.insertCarAt(curr, possibleLaneChanges[0].insertAt)
-          this.removeCarAt(i)
-          // This car is done, move on to the next car
-          // Also don't increment i, since we just removed a car
-          continue
-        }
+          return b.distanceInFront / b.carSpeedInFront - a.distanceInFront / a.carSpeedInFront
+        })
+      }
+
+      if (possibleLaneChanges[0].laneTo !== this) {
+        // Actually Change lanes
+        possibleLaneChanges[0].laneTo.insertCarAt(curr, possibleLaneChanges[0].insertAt)
+        this.removeCarAt(i)
+        // This car is done, move on to the next car
+        // Also don't increment i, since we just removed a car
+        continue
       }
 
       if (curr.x + curr.length >= carInFront.x) {
@@ -226,9 +231,18 @@ class CarLane {
   }
 
   redraw () {
-    this.cars.forEach((car) => {
+    this.cars.forEach((car, i) => {
+      // Draw the car
       ctx.fillStyle = car.color
       ctx.fillRect(car.x, car.y, car.length, car.width)
+
+      // Draw the speed
+      ctx.fillStyle = '#333333'
+      ctx.fillText(`@${car.current_speed.toFixed(2)}`, car.x, car.y - TEXT_MARGIN)
+
+      // Draw the name
+      ctx.fillStyle = 'black'
+      ctx.fillText(car.name, car.x, car.y + CAR_WIDTH - TEXT_MARGIN)
     })
   }
 }
@@ -240,36 +254,38 @@ Interactions
 */
 const LANE_1_CENTER = (canvas.height - 2 * LINE_MARGIN) * 0.25 + LINE_MARGIN - CAR_WIDTH
 const LANE_2_CENTER = (canvas.height - 2 * LINE_MARGIN) * 0.75 + LINE_MARGIN - CAR_WIDTH
-const START_LANES = [new CarLane(LANE_1_CENTER, []), new CarLane(LANE_2_CENTER, [])]
+const START_LANES = [new CarLane('L', LANE_1_CENTER, []), new CarLane('R', LANE_2_CENTER, [])]
 
 let LANES = START_LANES.map(lane => lane.clone())
 let SAVED_LANES = []
 
-function smallCarAt (x, y) {
-  return new Car(x, y, SMALL_CAR_LENGTH, 0, SMALL_CAR_TOP_SPEED, SMALL_CAR_TOP_ACCELERATION, 'green')
+function smallCarAt (name, x, y) {
+  return new Car(name, x, y, SMALL_CAR_LENGTH, 0, SMALL_CAR_TOP_SPEED, SMALL_CAR_TOP_ACCELERATION, '#dc53e6')
 }
 
-function bigCarAt (x, y) {
-  return new Car(x, y, BIG_CAR_LENGTH, 0, BIG_CAR_TOP_SPEED, BIG_CAR_TOP_ACCELERATION, 'red')
+function bigCarAt (name, x, y) {
+  return new Car(name, x, y, BIG_CAR_LENGTH, 0, BIG_CAR_TOP_SPEED, BIG_CAR_TOP_ACCELERATION, '#5392e6')
 }
 
 function addSmallCar (laneIndex) {
   const laneToAdd = LANES[laneIndex]
+  const carName = laneToAdd.name + laneToAdd.size()
   if (laneToAdd.size() === 0) {
-    laneToAdd.addCar(smallCarAt(LINE - SMALL_CAR_LENGTH, laneToAdd.y))
+    laneToAdd.addCar(smallCarAt(carName, LINE - SMALL_CAR_LENGTH, laneToAdd.y))
   } else {
     const lastCar = laneToAdd.cars[laneToAdd.size() - 1]
-    laneToAdd.addCar(smallCarAt(lastCar.x - MIN_STANDING_DISTANCE - SMALL_CAR_LENGTH, laneToAdd.y))
+    laneToAdd.addCar(smallCarAt(carName, lastCar.x - MIN_STANDING_DISTANCE - SMALL_CAR_LENGTH, laneToAdd.y))
   }
 }
 
 function addBigCar (laneIndex) {
   const laneToAdd = LANES[laneIndex]
+  const carName = laneToAdd.name + laneToAdd.size()
   if (laneToAdd.size() === 0) {
-    laneToAdd.addCar(bigCarAt(LINE - BIG_CAR_LENGTH, laneToAdd.y))
+    laneToAdd.addCar(bigCarAt(carName, LINE - BIG_CAR_LENGTH, laneToAdd.y))
   } else {
     const lastCar = laneToAdd.cars[laneToAdd.size() - 1]
-    laneToAdd.addCar(bigCarAt(lastCar.x - MIN_STANDING_DISTANCE - BIG_CAR_LENGTH, laneToAdd.y))
+    laneToAdd.addCar(bigCarAt(carName, lastCar.x - MIN_STANDING_DISTANCE - BIG_CAR_LENGTH, laneToAdd.y))
   }
 }
 
