@@ -146,75 +146,76 @@ class CarLane {
       const carInFront = this.cars[i - 1]
       let possibleLaneChanges = [new LaneChangeSituation(this, i, carInFront.current_speed, carInFront.x - curr.x - curr.length)]
 
+      const canChangeLanes = document.getElementById('canChangeLanes').checked
       // Explore changing lanes
-      for (const adjacent_lane of adjacent_lanes) {
+      if (canChangeLanes) {
+        for (const adjacent_lane of adjacent_lanes) {
 
-        // if no car in the next lane, definitely change lanes
-        if (adjacent_lane.size() === 0) {
-          possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, 0, INFINITY, INFINITY))
-          break
-        }
-
-        let j = 0
-        // Go through all the cars in the adjacent lane and try to find a spot
-        while (j < adjacent_lane.size()) {
-          // Try to find the first car behind with enough of a gap
-          if (adjacent_lane.cars[j].x + adjacent_lane.cars[j] + MAX_SAFE_DISTANCE >= curr.x) {
-            continue
-          }
-
-          if (j === 0) {
-            // Shouldn't happen - but the first car in the other lane is really behind
+          // if no car in the next lane, definitely change lanes
+          if (adjacent_lane.size() === 0) {
             possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, 0, INFINITY, INFINITY))
             break
           }
 
-          const nextLaneCarInFront = adjacent_lane.cars[j - 1]
+          let j = 0
+          // Go through all the cars in the adjacent lane and try to find a spot
+          while (j < adjacent_lane.size()) {
+            // Try to find the first car behind with enough of a gap
+            if (adjacent_lane.cars[j].x + adjacent_lane.cars[j] + MAX_SAFE_DISTANCE >= curr.x) {
+              continue
+            }
 
-          // if the car in front is far enough, there's a possibility of a lane change
-          if (curr.x + curr.length + MAX_SAFE_DISTANCE < nextLaneCarInFront.x) {
-            possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, j, nextLaneCarInFront.current_speed, nextLaneCarInFront.x - curr.x - curr.length))
+            if (j === 0) {
+              // Shouldn't happen - but the first car in the other lane is really behind
+              possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, 0, INFINITY, INFINITY))
+              break
+            }
+
+            const nextLaneCarInFront = adjacent_lane.cars[j - 1]
+
+            // if the car in front is far enough, there's a possibility of a lane change
+            if (curr.x + curr.length + MAX_SAFE_DISTANCE < nextLaneCarInFront.x) {
+              possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, j, nextLaneCarInFront.current_speed, nextLaneCarInFront.x - curr.x - curr.length))
+            }
+
+            // Either way, we won't find another spot, so will break
+            break
           }
 
-          // Either way, we won't find another spot, so will break
-          break
+          // if we're at the very end, that's also a possibility to change lanes
+          const nextLaneLastCar = adjacent_lane.cars[adjacent_lane.size() - 1]
+          if (curr.x + curr.length + MAX_SAFE_DISTANCE < nextLaneLastCar.x) {
+            possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, adjacent_lane.size(), nextLaneLastCar.current_speed, nextLaneLastCar.x - curr.x - curr.length))
+          }
         }
 
-        // if we're at the very end, that's also a possibility to change lanes
-        const nextLaneLastCar = adjacent_lane.cars[adjacent_lane.size() - 1]
-        if (curr.x + curr.length + MAX_SAFE_DISTANCE < nextLaneLastCar.x) {
-          possibleLaneChanges.push(new LaneChangeSituation(adjacent_lane, adjacent_lane.size(), nextLaneLastCar.current_speed, nextLaneLastCar.x - curr.x - curr.length))
+        possibleLaneChanges.sort((a, b) => {
+          return b.score() - a.score()
+        })
+
+        if (possibleLaneChanges[0].laneTo !== this) {
+          // Actually Change lanes
+          possibleLaneChanges[0].laneTo.insertCarAt(curr, possibleLaneChanges[0].insertAt)
+          this.removeCarAt(i)
+          // This car is done, move on to the next car
+          // Also don't increment i, since we just removed a car
+          continue
         }
       }
 
-      possibleLaneChanges.sort((a, b) => {
-        return b.score() - a.score()
-      })
-
-      if (possibleLaneChanges[0].laneTo !== this) {
-        // Actually Change lanes
-        possibleLaneChanges[0].laneTo.insertCarAt(curr, possibleLaneChanges[0].insertAt)
-        this.removeCarAt(i)
-        // This car is done, move on to the next car
-        // Also don't increment i, since we just removed a car
-        continue
-      }
-
-      const prev = this.cars[i - 1]
-
-      if (curr.x + curr.length >= prev.x) {
+      if (curr.x + curr.length >= carInFront.x) {
         // you hit the car in front
-        prev.current_speed = 0
-        prev.current_acceleration = 0
+        carInFront.current_speed = 0
+        carInFront.current_acceleration = 0
         curr.current_speed = 0
         curr.current_acceleration = 0
 
         state = 'STOPPED'
         controlButton.innerHTML = 'Back to start'
-      } else if (curr.x >= prev.x - MIN_SAFE_DISTANCE - curr.length) {
+      } else if (curr.x >= carInFront.x - MIN_SAFE_DISTANCE - curr.length) {
         // slow down if too close to the car in front
         curr.current_acceleration = BRAKING_ACCELERATION
-      } else if (curr.x < prev.x - MAX_SAFE_DISTANCE - curr.length) {
+      } else if (curr.x < carInFront.x - MAX_SAFE_DISTANCE - curr.length) {
         // accelerate if car in front is far away
         curr.current_acceleration = curr.top_acceleration
       } else {
