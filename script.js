@@ -30,7 +30,7 @@ const MIN_SAFE_DISTANCE = 12
 const MAX_SAFE_DISTANCE = 20
 const CAR_WIDTH = 20
 const SMALL_CAR_LENGTH = 20
-const BIG_CAR_LENGTH = 240
+const BIG_CAR_LENGTH = 300
 const SMALL_CAR_TOP_SPEED = 2.5
 const BIG_CAR_TOP_SPEED = 1
 const SMALL_CAR_TOP_ACCELERATION = 0.05
@@ -316,6 +316,67 @@ function reset () {
   controlButton.innerHTML = 'Start'
   controlButton.disabled = true
   LANES = START_LANES.map(lane => lane.clone())
+}
+
+function preset_big_vs_small () {
+  reset()
+  addBigCar(0)
+  addSmallCar(0)
+
+  for (let i = 0; i < 12; i++) {
+    addSmallCar(1)
+  }
+}
+
+function preset_all_big_vs_all_small () {
+  reset()
+  for (let i = 0; i < 4; i++) {
+    addBigCar(0)
+  }
+  addSmallCar(0)
+
+  for (let i = 0; i < 43; i++) {
+    addSmallCar(1)
+  }
+}
+
+function preset_small_in_big_vs_all_small () {
+  reset()
+  for (let i = 0; i < 4; i++) {
+    addBigCar(0)
+    addSmallCar(0)
+    addSmallCar(0)
+  }
+
+  for (let i = 0; i < 50; i++) {
+    addSmallCar(1)
+  }
+}
+
+function preset_all_smalls_blocked_by_big () {
+  reset()
+  addBigCar(0)
+  for (let i = 0; i < 30; i++) {
+    addSmallCar(0)
+  }
+
+  for (let i = 0; i < 40; i++) {
+    addSmallCar(1)
+  }
+}
+
+function preset_big_in_small_vs_all_small () {
+  reset()
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 12; j++) {
+      addSmallCar(0)
+    }
+    addBigCar(0)
+  }
+
+  for (let i = 0; i < 45; i++) {
+    addSmallCar(1)
+  }
 }
 
 function drawFinishingLine () {
