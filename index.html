@@ -10,8 +10,8 @@
 </head>
 <body>
     <p>There are 2 lanes of cars at the traffic lights, you want to know which lane would get you to the light faster.</p>
-    <div style="display: flex; justify-content: space-between; width: 50vw; margin-bottom: 10px;">
-        <div style="text-align: left">
+    <div style="display: flex; justify-content: space-between; width: 60vw; margin-bottom: 10px;">
+        <div>
             <div>
                 <label>Lane 1:</label>
                 <button id="addSmallCarLane1" onclick="addSmallCar(0)">Add Small Car</button>
@@ -27,7 +27,15 @@
                 <input type="checkbox" id="canChangeLanes" checked>
             </div>
         </div>
-        <div style="text-align: right">
+        <div style="display: flex; flex-direction: column;">
+            <div>Some example comparisons:</div>
+            <button id="big-vs-small" onclick="preset_big_vs_small()">One big car v.s. lots of small cars </button>
+            <button id="all-big-vs-all-small" onclick="preset_all_big_vs_all_small()">All big cars v.s. all small cars </button>
+            <button id="small-in-big-vs-all-small" onclick="preset_small_in_big_vs_all_small()">Small cars in between big cars v.s. all small cars </button>
+            <button id="big-in-small-vs-all-small" onclick="preset_big_in_small_vs_all_small()">Big cars in between small cars v.s. all small cars </button>
+            <button id="all-smalls-blocked-by-big" onclick="preset_all_smalls_blocked_by_big()">One big car blocking all small cars </button>
+        </div>
+        <div style="display: flex; flex-direction: column;">
             <button id="controlButton" onclick="start_pause()">Start</button>
             <button id="resetButton" onclick="reset()">Reset</button>
 
